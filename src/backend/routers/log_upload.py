@@ -36,7 +36,6 @@ async def upload_log_file(file: UploadFile = File(...)):
     if parse_result["status"] != "success":
         raise HTTPException(status_code=400, detail=f"Log parsing failed: {parse_result.get('error')}")
 
-    # Store log metadata and parsed telemetry in the database
     db = SessionLocal()
     try:
         log_meta = LogMetadata(
@@ -48,21 +47,20 @@ async def upload_log_file(file: UploadFile = File(...)):
         db.commit()
         db.refresh(log_meta)
         log_id = log_meta.id
-        # Store each message type count as a dummy telemetry row (for demo)
-        # In a real implementation, you would store each message instance with its timestamp and data
-        for msg_type, count in parse_result["message_counts"].items():
+        # Store each parsed message as a row in parsed_telemetry
+        for msg in parse_result["messages"]:
             db.add(ParsedTelemetry(
                 log_id=log_id,
-                message_type=msg_type,
-                timestamp=0.0,  # Placeholder, real parser should extract timestamp
-                data={"count": count}
+                message_type=msg["message_type"],
+                timestamp=msg["timestamp"],
+                data=msg["data"]
             ))
         db.commit()
         return {
             "filename": filename,
             "size_mb": f"{size_mb:.2f}",
             "log_id": log_id,
-            "message": f"Log and {len(parse_result['message_counts'])} message types stored in database."
+            "message": f"Log and {parse_result['total_messages']} messages stored in database."
         }
     finally:
         db.close() 

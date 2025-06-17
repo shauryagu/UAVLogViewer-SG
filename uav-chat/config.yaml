@@ -1,0 +1,19 @@
+model_name: uav-chat-mistral-7b
+python_version: py312
+resources:
+  accelerator: T4
+  use_gpu: true
+  cpu: "3"
+  memory: 14Gi
+requirements:
+  - torch==2.3.1
+  - transformers==4.38.2
+  - tokenizers==0.15.2
+  - accelerate==0.27.2
+  - bitsandbytes==0.42.0
+  - sentencepiece==0.2.0
+system_packages: []
+
+secrets:
+  hf_access_token: null
+

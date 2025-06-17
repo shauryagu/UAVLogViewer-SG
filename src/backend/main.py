@@ -33,6 +33,8 @@ async def root():
 # Include UAV-specific routers
 from routers import log_upload
 app.include_router(log_upload.router)
+from routers import telemetry
+app.include_router(telemetry.router)
 
 # from routers import log_upload, telemetry
 # app.include_router(log_upload.router)
