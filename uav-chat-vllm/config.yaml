@@ -1,0 +1,29 @@
+model_name: uav-chat-mistral-vllm-7b
+python_version: py312
+model_metadata:
+  engine_args:
+    model: mistralai/Mistral-7B-Instruct-v0.3
+  example_model_input:
+    messages:
+      - role: system
+        content: "You are a helpful assistant for UAV log analysis."
+      - role: user
+        content: "What can you tell me about this UAV log?"
+    stream: true
+    max_tokens: 512
+    temperature: 0.6
+base_image:
+  image: vllm/vllm-openai:v0.7.3
+docker_server:
+  start_command: sh -c "HF_TOKEN=$(cat /secrets/hf_access_token) vllm serve mistralai/Mistral-7B-Instruct-v0.3 --enable-prefix-caching --enable-chunked-prefill"
+  readiness_endpoint: /health
+  liveness_endpoint: /health
+  predict_endpoint: /v1/completions
+  server_port: 8000
+runtime:
+  predict_concurrency: 256
+resources:
+  accelerator: A10G
+  use_gpu: true
+secrets:
+  hf_access_token: null
